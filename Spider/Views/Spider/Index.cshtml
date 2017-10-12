@@ -1,0 +1,46 @@
+﻿@model List<Model.JDProduct>
+@{
+	ViewBag.Title = "JD";
+}
+
+<div style="padding: 50px 50px 20px;">
+	<form class="form-horizontal" role="form" action="~/Spider/Index" method="post">
+		<div class="form-group">
+			<label class="col-lg-3 control-label col-lg-offset-1">关键字</label>
+			<div class="col-lg-4 input-group">
+				<input type="text" class="form-control" placeholder="请输入关键字" name="keywork">
+				<span class="input-group-btn">
+					<button class="btn btn-primary" type="submit">搜索</button>
+				</span>
+			</div>
+		</div>
+	</form>
+
+	<table class="table table-bordered">
+		<caption>边框表格布局</caption>
+		<thead>
+			<tr>
+				<th>商品名称</th>
+				<th>价格</th>
+				<th>评价数</th>
+				<th>商店名称</th>
+				<th>是否京东自营</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var pro in ViewData["JD"] as List<Model.JDProduct>)
+			{
+				<tr>
+					<td>@pro.name</td>
+					<td>@pro.price</td>
+					<td>@pro.commit</td>
+					<td>@pro.shop</td>
+					<td>@pro.IsSelf</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+
+</div>
+
+
