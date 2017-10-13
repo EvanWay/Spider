@@ -15,8 +15,13 @@ namespace Spider.Controllers
     public class SpiderController : Controller
     {
         // GET: Spider
-        public ActionResult Index(string keywork)
+        public ActionResult Index(string keywork,string page)
         {
+			ViewBag.keywork = keywork;
+			if (string.IsNullOrEmpty(page))
+			{
+				page = "1";
+			}
 			if (string.IsNullOrEmpty(keywork))
 			{
 				ViewData["JD"] = new List<JDProduct>();
@@ -24,12 +29,18 @@ namespace Spider.Controllers
 			}
 			else
 			{
-				//keywork = "固态硬盘";
 				//中文编码
 				string encodingkeywork = System.Web.HttpUtility.UrlEncode(keywork);
-				string url = "https://search.jd.com/Search?keyword=" + encodingkeywork + "&enc=utf-8";
+				//页码2n-1
+				string url = "https://search.jd.com/Search?keyword=" + encodingkeywork + "&enc=utf-8" + "&page=" + (2 * (Convert.ToInt32(page)) - 1);
+				//爬取
+				Tuple<List<JDProduct>, int> t = AnalyticsHtml(url);
+				ViewData["currentpage"] = page;
+				ViewData["totalpage"] = t.Item2;
+
 				ViewData["pageHtml"] = GetPageHtml(url);
-				ViewData["JD"] = AnalyticsHtml(url);
+				ViewData["JD"] = t.Item1;
+				
 				return View();
 			}
         }
@@ -59,7 +70,7 @@ namespace Spider.Controllers
 		/// </summary>
 		/// <param name="url"></param>
 		/// <returns></returns>
-		private List<JDProduct> AnalyticsHtml(string url)
+		private Tuple<List<JDProduct>,int> AnalyticsHtml(string url)
 		{
 			List<JDProduct> jdlist = new List<JDProduct>();
 			HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
@@ -89,7 +100,12 @@ namespace Spider.Controllers
 
 				jdlist.Add(pro);
 			}
-			return jdlist;
+			//获取总页数
+			var totalPage = doc.FindFirst("#J_topPage > .fp-text > i");
+			int totalPage_num = Convert.ToInt32(totalPage.InnerText());
+
+			return Tuple.Create(jdlist, totalPage_num);
 		}
+
 	}
 }
