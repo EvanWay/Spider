@@ -15,7 +15,7 @@ namespace Spider.Controllers
     public class SpiderController : Controller
     {
         // GET: Spider
-        public ActionResult Index(string keywork,string page)
+        public ActionResult Index(string keywork,string page,string Radios)
         {
 			ViewBag.keywork = keywork;
 			if (string.IsNullOrEmpty(page))
@@ -27,24 +27,41 @@ namespace Spider.Controllers
 				ViewData["JD"] = new List<JDProduct>();
 				return View();
 			}
-			else
+			//中文编码
+			string encodingkeywork = System.Web.HttpUtility.UrlEncode(keywork);
+			if (Radios == "1")//京东
 			{
-				//中文编码
-				string encodingkeywork = System.Web.HttpUtility.UrlEncode(keywork);
 				//页码2n-1
 				string url = "https://search.jd.com/Search?keyword=" + encodingkeywork + "&enc=utf-8" + "&page=" + (2 * (Convert.ToInt32(page)) - 1);
 				//爬取
-				Tuple<List<JDProduct>, int> t = AnalyticsHtml(url);
+				Tuple<List<JDProduct>, int> t = JD_AnalyticsHtml(url);
 				ViewData["currentpage"] = page;
 				ViewData["totalpage"] = t.Item2;
 
 				ViewData["pageHtml"] = GetPageHtml(url);
 				ViewData["JD"] = t.Item1;
-				
+
 				return View();
 			}
-        }
+			else if (Radios == "2")//苏宁
+			{
+				//页码N-1
+				string url = "https://search.suning.com/" + encodingkeywork + "/&cp=" + ((Convert.ToInt32(page)) - 1);
 
+				return RedirectToAction("SN", new { keywork = keywork, page = page, Radios = Radios });
+			}
+			return View();
+			//苏宁https://search.suning.com/固态硬盘/&cp=1
+		}
+
+		public ActionResult SN(string keywork, string page, string Radios)
+		{
+			ViewData["currentpage"] = 1;
+			ViewData["totalpage"] = 10;
+
+			ViewData["SN"] = new List<SNProduct>();
+			return View();
+		}
 
 		/// <summary>
 		/// 获取页面html源码
@@ -70,7 +87,7 @@ namespace Spider.Controllers
 		/// </summary>
 		/// <param name="url"></param>
 		/// <returns></returns>
-		private Tuple<List<JDProduct>,int> AnalyticsHtml(string url)
+		private Tuple<List<JDProduct>,int> JD_AnalyticsHtml(string url)
 		{
 			List<JDProduct> jdlist = new List<JDProduct>();
 			HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
@@ -105,6 +122,17 @@ namespace Spider.Controllers
 			int totalPage_num = Convert.ToInt32(totalPage.InnerText());
 
 			return Tuple.Create(jdlist, totalPage_num);
+		}
+
+
+		/// <summary>
+		/// 爬取苏宁商品list
+		/// </summary>
+		/// <param name="url"></param>
+		/// <returns></returns>
+		private Tuple<List<JDProduct>, int> SN_AnalyticsHtml(string url)
+		{
+			return null;
 		}
 
 	}
