@@ -45,8 +45,7 @@ namespace Spider.Controllers
 			}
 			else if (Radios == "2")//苏宁
 			{
-				//页码N-1
-				string url = "https://search.suning.com/" + encodingkeywork + "/&cp=" + ((Convert.ToInt32(page)) - 1);
+				
 
 				return RedirectToAction("SN", new { keywork = keywork, page = page, Radios = Radios });
 			}
@@ -56,10 +55,17 @@ namespace Spider.Controllers
 
 		public ActionResult SN(string keywork, string page, string Radios)
 		{
-			ViewData["currentpage"] = 1;
-			ViewData["totalpage"] = 10;
+			ViewBag.keywork = keywork;
+			//中文编码
+			string encodingkeywork = System.Web.HttpUtility.UrlEncode(keywork);
+			//页码N-1
+			string url = "https://search.suning.com/" + encodingkeywork + "/&cp=" + ((Convert.ToInt32(page)) - 1);
+			//爬取
+			Tuple<List<SNProduct>, int> t = SN_AnalyticsHtml(url);
+			ViewData["currentpage"] = page;
+			ViewData["totalpage"] = t.Item2;
 
-			ViewData["SN"] = new List<SNProduct>();
+			ViewData["SN"] = t.Item1;
 			return View();
 		}
 
@@ -130,9 +136,42 @@ namespace Spider.Controllers
 		/// </summary>
 		/// <param name="url"></param>
 		/// <returns></returns>
-		private Tuple<List<JDProduct>, int> SN_AnalyticsHtml(string url)
+		private Tuple<List<SNProduct>, int> SN_AnalyticsHtml(string url)
 		{
-			return null;
+			List<SNProduct> snlist = new List<SNProduct>();
+			HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+			request.Method = "GET";
+			//伪装浏览器
+			request.UserAgent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36";
+			HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+
+			var parser = new JumonyParser();
+			var doc = parser.LoadDocument(response.GetResponseStream(), Encoding.UTF8, new Uri(url));
+			var list = doc.Find("#filter-results > ul > .product");
+			foreach (var li in list)
+			{
+				SNProduct pro = new SNProduct();
+
+				var price = li.FindFirst(".prive-tag");
+				var name = li.FindFirst(".sell-point > a");
+				var commit = li.FindFirst(".com-cnt > .num");
+				var shop = li.FindFirst(".res-info > .seller");
+
+				pro.link = name.Attribute("href").Value();
+				pro.price = 0;
+				pro.name = name.InnerText();
+				pro.commit = commit.InnerText();
+				pro.shop = shop.InnerText();
+
+				snlist.Add(pro);
+			}
+			//获取总页数
+			var totalPage = doc.FindFirst(".second-box > .little-page");
+			string totalPage_num = totalPage.InnerText().Trim();
+			string[] sArray = totalPage_num.Split('/');
+			string x = sArray[1];
+
+			return Tuple.Create(snlist, Convert.ToInt32(x));
 		}
 
 	}

@@ -9,7 +9,6 @@ namespace Model
 	public class SNProduct : Product
 	{
 		public string shop { get; set; }
-		public bool IsSelf { get; set; }
 		public string commit { get; set; }
 		public string link { get; set; }
 	}
