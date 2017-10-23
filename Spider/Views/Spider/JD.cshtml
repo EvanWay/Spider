@@ -1,14 +1,14 @@
-﻿@model List<Model.SNProduct>
+﻿@model List<Model.JDProduct>
 @{
-	ViewBag.Title = "SN";
+	ViewBag.Title = "JD";
 }
 <div style="padding: 50px 50px 20px;">
 	<input id="currentPage" type="hidden" value="1" />
 	<input id="totalPages" type="hidden" value="10" />
 
-	<form class="form-horizontal" role="form" action="~/Spider/SN" method="post">
+	<form class="form-horizontal" role="form" action="~/Spider/JD" method="post">
 		<div class="form-group">
-			<label class="col-lg-3 control-label col-lg-offset-1">苏宁易购</label>
+			<label class="col-lg-3 control-label col-lg-offset-1">京东</label>
 			<div class="col-lg-4 input-group">
 				<input type="text" class="form-control" placeholder="请输入关键字" name="keywork">
 				<span class="input-group-btn">
@@ -25,17 +25,19 @@
 					<th>价格</th>
 					<th>评价数</th>
 					<th>商店名称</th>
+					<th>是否京东自营</th>
 					<th>链接</th>
 				</tr>
 			</thead>
 			<tbody>
-				@foreach (var pro in ViewData["SN"] as List<Model.SNProduct>)
+				@foreach (var pro in ViewData["JD"] as List<Model.JDProduct>)
 			{
 					<tr>
 						<td>@pro.name</td>
 						<td>@pro.price</td>
 						<td>@pro.commit</td>
 						<td>@pro.shop</td>
+						<td>@pro.IsSelf</td>
 						<td><a href="@pro.link">>>></a></td>
 					</tr>
 			}
@@ -53,7 +55,7 @@
 				else
 				{
 
-					<li><a href="/Spider/SN?keywork=@ViewBag.keywork&page=@i">@i</a></li>
+					<li><a href="/Spider/JD?keywork=@ViewBag.keywork&page=@i">@i</a></li>
 				}
 			}
 			<li><a href="#">&raquo;</a></li>
@@ -61,7 +63,3 @@
 	</form>
 
 </div>
-
-
-
-

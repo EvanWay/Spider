@@ -20,41 +20,50 @@ namespace Spider.Controllers
 			ViewBag.keywork = keywork;
 			if (string.IsNullOrEmpty(page))
 			{
-				page = "1";
+				page = "1";//初始为第一页
 			}
 			if (string.IsNullOrEmpty(keywork))
 			{
 				ViewData["JD"] = new List<JDProduct>();
 				return View();
 			}
-			//中文编码
+			//URL中文编码
 			string encodingkeywork = System.Web.HttpUtility.UrlEncode(keywork);
+
 			if (Radios == "1")//京东
 			{
-				//页码2n-1
-				string url = "https://search.jd.com/Search?keyword=" + encodingkeywork + "&enc=utf-8" + "&page=" + (2 * (Convert.ToInt32(page)) - 1);
-				//爬取
-				Tuple<List<JDProduct>, int> t = JD_AnalyticsHtml(url);
-				ViewData["currentpage"] = page;
-				ViewData["totalpage"] = t.Item2;
-
-				ViewData["pageHtml"] = GetPageHtml(url);
-				ViewData["JD"] = t.Item1;
-
-				return View();
+				return RedirectToAction("JD", new { keywork = keywork, page = page, Radios = Radios });
 			}
 			else if (Radios == "2")//苏宁
 			{
-				
-
 				return RedirectToAction("SN", new { keywork = keywork, page = page, Radios = Radios });
 			}
 			return View();
-			//苏宁https://search.suning.com/固态硬盘/&cp=1
+			
+		}
+
+		public ActionResult JD(string keywork, string page, string Radios)
+		{
+			//京东搜索规则https://search.jd.com/Search?keyword=固态硬盘&enc=utf-8&page=2n-1
+			ViewBag.keywork = keywork;
+			//中文编码
+			string encodingkeywork = System.Web.HttpUtility.UrlEncode(keywork);
+			//页码2n-1
+			string url = "https://search.jd.com/Search?keyword=" + encodingkeywork + "&enc=utf-8" + "&page=" + (2 * (Convert.ToInt32(page)) - 1);
+			//爬取
+			Tuple<List<JDProduct>, int> t = JD_AnalyticsHtml(url);
+			ViewData["currentpage"] = page;
+			ViewData["totalpage"] = t.Item2;
+
+			ViewData["pageHtml"] = GetPageHtml(url);
+			ViewData["JD"] = t.Item1;
+			return View();
 		}
 
 		public ActionResult SN(string keywork, string page, string Radios)
 		{
+			//苏宁搜索规则https://search.suning.com/固态硬盘/&cp=n-1
+
 			ViewBag.keywork = keywork;
 			//中文编码
 			string encodingkeywork = System.Web.HttpUtility.UrlEncode(keywork);

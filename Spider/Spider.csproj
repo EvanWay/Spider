@@ -209,6 +209,7 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Spider\Index.cshtml" />
     <Content Include="Views\Spider\SN.cshtml" />
+    <Content Include="Views\Spider\JD.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
