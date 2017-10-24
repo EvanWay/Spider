@@ -61,7 +61,7 @@ namespace Spider.Controllers
 		}
 
 		public ActionResult SN(string keywork, string page, string Radios)
-		{
+		 {
 			//苏宁搜索规则https://search.suning.com/固态硬盘/&cp=n-1
 
 			ViewBag.keywork = keywork;
@@ -114,6 +114,11 @@ namespace Spider.Controllers
 			var parser = new JumonyParser();
 			var doc = parser.LoadDocument(response.GetResponseStream(), Encoding.UTF8, new Uri(url));
 			var list = doc.Find("#J_goodsList > ul > .gl-item > .gl-i-wrap");
+			if (list.Count() == 0)
+			{
+				//查询不到结果
+				return Tuple.Create(jdlist, 0);
+			}
 			foreach (var li in list)
 			{
 				JDProduct pro = new JDProduct();
@@ -156,6 +161,10 @@ namespace Spider.Controllers
 			var parser = new JumonyParser();
 			var doc = parser.LoadDocument(response.GetResponseStream(), Encoding.UTF8, new Uri(url));
 			var list = doc.Find("#filter-results > ul > .product");
+			if (list.Count() == 0)
+			{
+				return Tuple.Create(snlist, 0);
+			}
 			foreach (var li in list)
 			{
 				SNProduct pro = new SNProduct();
