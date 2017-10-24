@@ -139,7 +139,6 @@ namespace Spider.Controllers
 			return Tuple.Create(jdlist, totalPage_num);
 		}
 
-
 		/// <summary>
 		/// 爬取苏宁商品list
 		/// </summary>
